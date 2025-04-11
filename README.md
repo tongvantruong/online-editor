@@ -7,6 +7,7 @@
 - [x] User can _add image / text_ from the sidebar to the canvas
   - Support only image, text will be done later if have more time
 - [x] User can _move and delete the image / text_ inside the canvas
+  - Right click to see context menu
   - Support both mouse and keyboard
   - Apply throttle to improve performance
 - [x] The created objects on canvas can be saved and repopulated even if we refresh the browser!
@@ -21,5 +22,5 @@
 - [ ] Hold Cmd/Control + click to select multi images then can move or delete multi images
 - [ ] Select multi images by mouse
 - [ ] Right click should show list of actions on as a context menu
-- [ ] Duplicate feature: allow duplicate a selected image, don't need to copy & paste
+- [x] Duplicate feature (right click to see the action): allow duplicate a selected image, don't need to copy & paste
 - [ ] Bring to front feature

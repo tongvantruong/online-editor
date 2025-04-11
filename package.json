@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon --watch './**/*.ts' --exec 'npx tsx' ./src/server.ts",
-    "dev": "vite",
+    "be": "nodemon --watch './**/*.ts' --exec 'npx tsx' ./src/server.ts",
+    "fe": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "type-check": "vue-tsc --noEmit"

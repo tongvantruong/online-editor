@@ -30,17 +30,9 @@
             :key="index"
             :style="{ left: image.x + 'px', top: image.y + 'px' }"
             @mousedown="startDragging(index, $event)"
+            @contextmenu="showContextMenu($event, index)"
           >
-            <img :src="image.url" draggable="false" />
-            <button
-              v-if="selectedIndex === index"
-              class="delete-btn"
-              @mousedown.stop
-              loading="lazy"
-              @click="deleteImage(index)"
-            >
-              x
-            </button>
+            <img :src="image.url" draggable="false" :alt="`Image ${index}`" />
           </div>
         </div>
       </div>
@@ -49,6 +41,7 @@
     <footer class="footer">
       <p>&copy; {{ currentYear }} Truong Tong</p>
     </footer>
+    <ContextMenu :x="contextPosition.x" :y="contextPosition.y" :visible="contextVisible" :actions="actions" />
   </div>
 </template>
 
@@ -56,15 +49,52 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useThrottle } from './composables/useThrottle'
 import UploadButton from './components/UploadButton.vue'
+import ContextMenu from './components/ContextMenu.vue'
 import { useLocalStorage } from '@vueuse/core'
 import { useImageApi } from './composables/useImageApi'
 import { CanvasImage, ImageUrl } from './types/image.type'
+import { useContextMenu } from './composables/useContextMenu'
+import { MenuItem } from './components/ContextMenu.vue'
 
 const KEY_CANVAS_IMAGES = 'CANVAS_IMAGES'
 
 const currentYear = new Date().getFullYear()
 
 const { images, fetchImages, loading, error } = useImageApi()
+const {
+  visible: contextVisible,
+  position: contextPosition,
+  target: contextTarget,
+  show: showContextMenu,
+  hide: hideContextMenu,
+} = useContextMenu<number>()
+
+const actions: MenuItem[] = [
+  {
+    icon: '❌',
+    label: 'Delete',
+    action: () => {
+      if (contextTarget.value !== null) deleteImage(contextTarget.value)
+      hideContextMenu()
+    },
+  },
+  {
+    icon: '📄',
+    label: 'Duplicate',
+    action: () => {
+      if (contextTarget.value !== null) duplicateImage(contextTarget.value)
+      hideContextMenu()
+    },
+  },
+  {
+    icon: '📄',
+    label: 'Bring to front',
+    action: () => {
+      if (contextTarget.value !== null) bringImageToFront(contextTarget.value)
+      hideContextMenu()
+    },
+  },
+]
 
 const droppedImages = useLocalStorage<CanvasImage[]>(KEY_CANVAS_IMAGES, [], {
   // Compress the storage to store a large number of images
@@ -215,6 +245,23 @@ const deleteImage = (index: number) => {
     selectedIndex.value--
   }
 }
+
+const duplicateImage = (index: number) => {
+  const targetImage = droppedImages.value[index]
+  const newIndex = index + 1
+  const newOffset = 10
+  droppedImages.value.splice(newIndex, 0, {
+    ...targetImage,
+    x: targetImage.x + newOffset,
+    y: targetImage.y + newOffset,
+  })
+  selectedIndex.value = newIndex
+  draggingIndex.value = newIndex
+}
+
+const bringImageToFront = (index: number) => {
+  // const targetImage = droppedImages.value[index]
+}
 </script>
 
 <style scoped>
@@ -314,25 +361,6 @@ div.item {
   outline: 1px solid var(--color-primary);
   outline-offset: 2px;
   z-index: 10;
-}
-
-.delete-btn {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  background: var(--color-error);
-  color: var(--color-white);
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  font-size: 14px;
-  cursor: pointer;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
-  z-index: 20;
-}
-.delete-btn:hover {
-  background: var(--color-error-hover);
 }
 
 .footer {
