@@ -120,16 +120,23 @@ const fetchAllImages = async (): Promise<string[]> => {
   }
 }
 
+const validKeyBoards = ['Delete', 'Backspace', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'] as const
+type KeyBoard = (typeof validKeyBoards)[number]
+
 const handleKeydown = (e: KeyboardEvent) => {
-  e.preventDefault()
   if (selectedIndex.value === null) return
 
-  deleteSelectedImageOnDeleteOrBackspace(e)
-  moveSelectedImageOnArrowKeys(e)
+  // For type-safe
+  if (validKeyBoards.includes(e.key as KeyBoard)) {
+    e.preventDefault()
+    deleteSelectedImageOnDeleteOrBackspace(e)
+    moveSelectedImageOnArrowKeys(e)
+  }
 }
 
 const deleteSelectedImageOnDeleteOrBackspace = (e: KeyboardEvent) => {
-  if (e.key === 'Delete' || e.key === 'Backspace') {
+  const key = e.key as KeyBoard
+  if (key === 'Delete' || key === 'Backspace') {
     deleteImage(selectedIndex.value!!)
   }
 }
@@ -140,7 +147,7 @@ const moveSelectedImageOnArrowKeys = (e: KeyboardEvent) => {
   const normalSpeed = 1
   const step = e.shiftKey ? fastSpeedIfHoldingShift : normalSpeed
 
-  switch (e.key) {
+  switch (e.key as KeyBoard) {
     case 'ArrowUp':
       selectedImage.y -= step
       break
