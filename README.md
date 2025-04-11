@@ -1,11 +1,17 @@
+# Online Graphic Editor (Vue3 + TypeScript)
+
 ## Demo
+
 https://github.com/user-attachments/assets/82613c9d-d24f-4711-b95a-da4ba6bfbff2
 
 ## Unit Test Results
+
 <img width="954" alt="image" src="https://github.com/user-attachments/assets/a470e9f4-a69c-4f3e-b6be-8a22dcb11057" />
 
 ## E2E Tests
+
 Will add if have more time
+
 - [ ] should show the images on UI if uploaded
 - [ ] should render image on canvas if dragged and dropped
 - [ ] should delete the selected image by keyboard and context menu
