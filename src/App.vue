@@ -34,6 +34,7 @@
               v-if="selectedIndex === index"
               class="delete-btn"
               @mousedown.stop
+              loading="lazy"
               @click="deleteImage(index)"
             >
               x
@@ -53,6 +54,9 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useThrottle } from './composables/useThrottle'
 import UploadButton from './components/UploadButton.vue'
+import { useLocalStorage } from '@vueuse/core'
+
+const KEY_CANVAS_IMAGES = 'CANVAS_IMAGES'
 
 const currentYear = new Date().getFullYear()
 
@@ -64,7 +68,22 @@ type DroppedImage = {
   x: number
   y: number
 }
-const droppedImages = ref<DroppedImage[]>([])
+const droppedImages = useLocalStorage<DroppedImage[]>(KEY_CANVAS_IMAGES, [], {
+  // Compress the storage to store a large number of images
+  serializer: {
+    read: (value: string) => {
+      try {
+        return JSON.parse(decodeURIComponent(atob(value)))
+      } catch {
+        return []
+      }
+    },
+    write: (value: DroppedImage[]) => {
+      return btoa(encodeURIComponent(JSON.stringify(value)))
+    },
+  },
+})
+
 const draggedImage = ref<ImagePath | null>(null)
 const canvas = ref<HTMLElement | null>(null)
 
@@ -96,7 +115,7 @@ const fetchAllImages = async (): Promise<string[]> => {
     const images: string[] = await res.json()
     return images
   } catch (err) {
-    console.error('❌ Failed to load images:', err)
+    console.error('Failed to load images:', err)
     return []
   }
 }
