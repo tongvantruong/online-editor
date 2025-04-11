@@ -56,12 +56,20 @@ import { CanvasImage, ImageUrl } from './types/image.type'
 import { useContextMenu } from './composables/useContextMenu'
 import { MenuItem } from './components/ContextMenu.vue'
 import { useKeyboard } from './composables/useKeyboard'
+import { useDragAndDrop } from './composables/useDragAndDrop'
 
 const KEY_CANVAS_IMAGES = 'CANVAS_IMAGES'
 
 const currentYear = new Date().getFullYear()
 
+const selectedIndex = ref<number | null>(null)
+
 const { images, fetchImages, loading, error } = useImageApi()
+
+onMounted(() => {
+  fetchImages()
+})
+
 const {
   visible: contextVisible,
   position: contextPosition,
@@ -122,84 +130,18 @@ const canvasImage = useLocalStorage<CanvasImage[]>(KEY_CANVAS_IMAGES, [], {
   },
 })
 
-const draggedImage = ref<ImageUrl | null>(null)
 const canvas = ref<HTMLElement | null>(null)
 
-const isDragging = ref<boolean>(false)
-const draggingIndex = ref<number | null>(null)
-const selectedIndex = ref<number | null>(null)
-let offsetX = 0
-let offsetY = 0
-
-onMounted(() => {
-  fetchImages()
-})
+const { onDragStart, onDrop, startDragging, clearSelection } = useDragAndDrop(
+  canvasImage,
+  canvas,
+  selectedIndex
+)
 
 useKeyboard(canvasImage, selectedIndex, deleteImage)
 
 const onUploaded = (url: ImageUrl) => {
   images.value.push(url)
-}
-
-const onDragStart = (image: ImageUrl) => {
-  draggedImage.value = image
-}
-
-const onDrop = (e: DragEvent) => {
-  if (!canvas.value || !draggedImage.value) return
-
-  const canvasRect = canvas.value.getBoundingClientRect()
-  const imageWidth = 100
-  const imageHeight = 100
-
-  const x = e.clientX - canvasRect.left - imageWidth / 2
-  const y = e.clientY - canvasRect.top - imageHeight / 2
-
-  canvasImage.value.push({
-    url: draggedImage.value,
-    x,
-    y,
-    z: maxZIndex.value + 1,
-  })
-
-  draggedImage.value = null
-}
-
-const startDragging = (index: number, event: MouseEvent) => {
-  draggedImage.value = null
-  isDragging.value = true
-  draggingIndex.value = index
-  selectedIndex.value = index
-
-  const image = canvasImage.value[index]
-  offsetX = event.clientX - image.x
-  offsetY = event.clientY - image.y
-
-  window.addEventListener('mousemove', throttledOnDrag)
-  window.addEventListener('mouseup', stopDragging)
-}
-
-const onDrag = (event: MouseEvent) => {
-  if (isDragging.value && draggingIndex.value !== null) {
-    const image = canvasImage.value[draggingIndex.value]
-    image.x = event.clientX - offsetX
-    image.y = event.clientY - offsetY
-  }
-}
-
-const throttledOnDrag = useThrottle(onDrag)
-
-const stopDragging = () => {
-  isDragging.value = false
-  draggingIndex.value = null
-  window.removeEventListener('mousemove', throttledOnDrag)
-  window.removeEventListener('mouseup', stopDragging)
-}
-
-const clearSelection = (e: MouseEvent) => {
-  if ((e.target as HTMLElement).closest('.canvas-image') === null) {
-    selectedIndex.value = null
-  }
 }
 
 const duplicateImage = (index: number) => {
@@ -212,7 +154,6 @@ const duplicateImage = (index: number) => {
     y: targetImage.y + newOffset,
   })
   selectedIndex.value = newIndex
-  draggingIndex.value = newIndex
 }
 
 const maxZIndex = computed(() =>
