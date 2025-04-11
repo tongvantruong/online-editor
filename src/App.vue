@@ -25,10 +25,10 @@
         <div class="canvas" ref="canvas" @dragover.prevent @drop="onDrop" @mousedown="clearSelection">
           <div
             class="canvas-image"
-            v-for="(image, index) in droppedImages"
+            v-for="(image, index) in canvasImage"
             :class="{ selected: selectedIndex === index }"
             :key="index"
-            :style="{ left: image.x + 'px', top: image.y + 'px' }"
+            :style="getCanvasImageStyle(image)"
             @mousedown="startDragging(index, $event)"
             @contextmenu="showContextMenu($event, index)"
           >
@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useThrottle } from './composables/useThrottle'
 import UploadButton from './components/UploadButton.vue'
 import ContextMenu from './components/ContextMenu.vue'
@@ -71,7 +71,7 @@ const {
 
 const actions: MenuItem[] = [
   {
-    icon: '❌',
+    icon: '❌', // Just use simple icons to save time
     label: 'Delete',
     action: () => {
       if (contextTarget.value !== null) deleteImage(contextTarget.value)
@@ -87,7 +87,7 @@ const actions: MenuItem[] = [
     },
   },
   {
-    icon: '📄',
+    icon: '⬆️',
     label: 'Bring to front',
     action: () => {
       if (contextTarget.value !== null) bringImageToFront(contextTarget.value)
@@ -96,7 +96,7 @@ const actions: MenuItem[] = [
   },
 ]
 
-const droppedImages = useLocalStorage<CanvasImage[]>(KEY_CANVAS_IMAGES, [], {
+const canvasImage = useLocalStorage<CanvasImage[]>(KEY_CANVAS_IMAGES, [], {
   // Compress the storage to store a large number of images
   serializer: {
     read: (value: string) => {
@@ -156,7 +156,7 @@ const deleteSelectedImageOnDeleteOrBackspace = (e: KeyboardEvent) => {
 }
 
 const moveSelectedImageOnArrowKeys = (e: KeyboardEvent) => {
-  const selectedImage = droppedImages.value[selectedIndex.value!!]
+  const selectedImage = canvasImage.value[selectedIndex.value!!]
   const fastSpeedIfHoldingShift = 10
   const normalSpeed = 1
   const step = e.shiftKey ? fastSpeedIfHoldingShift : normalSpeed
@@ -191,10 +191,11 @@ const onDrop = (e: DragEvent) => {
   const x = e.clientX - canvasRect.left - imageWidth / 2
   const y = e.clientY - canvasRect.top - imageHeight / 2
 
-  droppedImages.value.push({
+  canvasImage.value.push({
     url: draggedImage.value,
     x,
     y,
+    z: maxZIndex.value + 1,
   })
 
   draggedImage.value = null
@@ -206,7 +207,7 @@ const startDragging = (index: number, event: MouseEvent) => {
   draggingIndex.value = index
   selectedIndex.value = index
 
-  const image = droppedImages.value[index]
+  const image = canvasImage.value[index]
   offsetX = event.clientX - image.x
   offsetY = event.clientY - image.y
 
@@ -216,7 +217,7 @@ const startDragging = (index: number, event: MouseEvent) => {
 
 const onDrag = (event: MouseEvent) => {
   if (isDragging.value && draggingIndex.value !== null) {
-    const image = droppedImages.value[draggingIndex.value]
+    const image = canvasImage.value[draggingIndex.value]
     image.x = event.clientX - offsetX
     image.y = event.clientY - offsetY
   }
@@ -238,7 +239,7 @@ const clearSelection = (e: MouseEvent) => {
 }
 
 const deleteImage = (index: number) => {
-  droppedImages.value.splice(index, 1)
+  canvasImage.value.splice(index, 1)
   if (selectedIndex.value === index) {
     selectedIndex.value = null
   } else if (selectedIndex.value !== null && selectedIndex.value > index) {
@@ -247,10 +248,10 @@ const deleteImage = (index: number) => {
 }
 
 const duplicateImage = (index: number) => {
-  const targetImage = droppedImages.value[index]
+  const targetImage = canvasImage.value[index]
   const newIndex = index + 1
   const newOffset = 10
-  droppedImages.value.splice(newIndex, 0, {
+  canvasImage.value.splice(newIndex, 0, {
     ...targetImage,
     x: targetImage.x + newOffset,
     y: targetImage.y + newOffset,
@@ -259,8 +260,17 @@ const duplicateImage = (index: number) => {
   draggingIndex.value = newIndex
 }
 
+const maxZIndex = computed(() =>
+  Math.max(...canvasImage.value.map(img => img.z).filter(z => z !== undefined))
+)
+
 const bringImageToFront = (index: number) => {
-  // const targetImage = droppedImages.value[index]
+  const targetImage = canvasImage.value[index]
+  targetImage.z = maxZIndex.value + 1
+}
+
+const getCanvasImageStyle = (image: CanvasImage) => {
+  return { left: image.x + 'px', top: image.y + 'px', zIndex: image.z ?? 0 }
 }
 </script>
 

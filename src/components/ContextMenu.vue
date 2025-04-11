@@ -39,9 +39,9 @@ const { visible, x, y, actions } = defineProps({
 .context-menu {
   position: absolute;
   z-index: 1000;
-  background-color: white;
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-menu);
+  box-shadow: 0 2px 8px var(--color-menu-shadow);
   border-radius: 4px;
   padding: 4px 0;
   min-width: 150px;
@@ -54,7 +54,7 @@ const { visible, x, y, actions } = defineProps({
 }
 
 .context-menu-item:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-menu-hover);
 }
 
 .context-menu-label {

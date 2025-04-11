@@ -8,6 +8,9 @@
   --color-primary: #42b883;
   --color-text-secondary: #5f5f5f;
   --color-footer: #353254;
+  --color-menu-hover: #f0f0f0;
+  --color-menu: #ccc;
+  --color-menu-shadow: #00000033;
 }
 
 * {
