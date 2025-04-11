@@ -15,6 +15,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
+import { useImageApi } from '../composables/useImageApi'
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const isDraggingOver = ref(false)
@@ -22,6 +23,8 @@ const isDraggingOver = ref(false)
 const emit = defineEmits<{
   uploaded: [url: string]
 }>()
+
+const { uploadImage } = useImageApi()
 
 const openFileDialog = () => {
   fileInput.value?.click()
@@ -46,27 +49,10 @@ const handleFiles = (files: File[]) => {
   files.forEach(file => {
     if (file.type.startsWith('image/')) {
       uploadImage(file).then(url => {
-        emit('uploaded', url)
+        if (url) emit('uploaded', url)
       })
     }
   })
-}
-
-const uploadImage = async (file: File) => {
-  const formData = new FormData()
-  formData.append('upload', file)
-
-  try {
-    const res = await fetch('http://localhost:8000/uploads', {
-      method: 'POST',
-      body: formData,
-    })
-    const result = await res.json()
-    if (!res.ok) throw new Error(result.message)
-    return result.file
-  } catch (err) {
-    console.error('Upload failed:', err)
-  }
 }
 </script>
 

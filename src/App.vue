@@ -3,7 +3,9 @@
     <aside class="sidebar">
       <h2>Items</h2>
       <UploadButton class="upload-button" @uploaded="onUploaded" />
-      <ul class="items">
+      <p v-if="loading">Loading...</p>
+      <p v-else-if="error">{{ error }}</p>
+      <ul v-else class="items">
         <img
           class="item"
           v-for="(image, index) in images"
@@ -29,7 +31,7 @@
             :style="{ left: image.x + 'px', top: image.y + 'px' }"
             @mousedown="startDragging(index, $event)"
           >
-            <img :src="image.path" draggable="false" />
+            <img :src="image.url" draggable="false" />
             <button
               v-if="selectedIndex === index"
               class="delete-btn"
@@ -55,20 +57,16 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useThrottle } from './composables/useThrottle'
 import UploadButton from './components/UploadButton.vue'
 import { useLocalStorage } from '@vueuse/core'
+import { useImageApi } from './composables/useImageApi'
+import { CanvasImage, ImageUrl } from './types/image.type'
 
 const KEY_CANVAS_IMAGES = 'CANVAS_IMAGES'
 
 const currentYear = new Date().getFullYear()
 
-type ImagePath = string
-const images = ref<ImagePath[]>([])
+const { images, fetchImages, loading, error } = useImageApi()
 
-type DroppedImage = {
-  path: ImagePath
-  x: number
-  y: number
-}
-const droppedImages = useLocalStorage<DroppedImage[]>(KEY_CANVAS_IMAGES, [], {
+const droppedImages = useLocalStorage<CanvasImage[]>(KEY_CANVAS_IMAGES, [], {
   // Compress the storage to store a large number of images
   serializer: {
     read: (value: string) => {
@@ -78,13 +76,13 @@ const droppedImages = useLocalStorage<DroppedImage[]>(KEY_CANVAS_IMAGES, [], {
         return []
       }
     },
-    write: (value: DroppedImage[]) => {
+    write: (value: CanvasImage[]) => {
       return btoa(encodeURIComponent(JSON.stringify(value)))
     },
   },
 })
 
-const draggedImage = ref<ImagePath | null>(null)
+const draggedImage = ref<ImageUrl | null>(null)
 const canvas = ref<HTMLElement | null>(null)
 
 const isDragging = ref<boolean>(false)
@@ -93,9 +91,8 @@ const selectedIndex = ref<number | null>(null)
 let offsetX = 0
 let offsetY = 0
 
-onMounted(async () => {
-  images.value = await fetchAllImages()
-  console.log(images.value[0])
+onMounted(() => {
+  fetchImages()
   window.addEventListener('keydown', handleKeydown)
 })
 
@@ -103,21 +100,8 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
 
-const onUploaded = (url: string) => {
+const onUploaded = (url: ImageUrl) => {
   images.value.push(url)
-}
-
-const fetchAllImages = async (): Promise<string[]> => {
-  try {
-    const res = await fetch('http://localhost:8000/images')
-    if (!res.ok) throw new Error('Failed to fetch images')
-
-    const images: string[] = await res.json()
-    return images
-  } catch (err) {
-    console.error('Failed to load images:', err)
-    return []
-  }
 }
 
 const validKeyBoards = ['Delete', 'Backspace', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'] as const
@@ -163,7 +147,7 @@ const moveSelectedImageOnArrowKeys = (e: KeyboardEvent) => {
   }
 }
 
-const onDragStart = (image: ImagePath) => {
+const onDragStart = (image: ImageUrl) => {
   draggedImage.value = image
 }
 
@@ -178,7 +162,7 @@ const onDrop = (e: DragEvent) => {
   const y = e.clientY - canvasRect.top - imageHeight / 2
 
   droppedImages.value.push({
-    path: draggedImage.value,
+    url: draggedImage.value,
     x,
     y,
   })
@@ -355,7 +339,7 @@ div.item {
   grid-area: footer;
   text-align: center;
   padding: 2rem;
-  background-color: #353254;
+  background-color: var(--color-footer);
   color: var(--color-white);
 }
 </style>
