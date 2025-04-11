@@ -15,6 +15,7 @@
           :key="index"
           loading="lazy"
           :alt="`Draggable image ${index}`"
+          role="listitem"
         />
       </ul>
     </aside>
@@ -22,7 +23,14 @@
     <main class="main">
       <h1>Online Graphic Editor</h1>
       <div class="canvas-container">
-        <div class="canvas" ref="canvas" @dragover.prevent @drop="onDrop" @mousedown="clearSelection">
+        <div
+          class="canvas"
+          ref="canvas"
+          @dragover.prevent
+          @drop="onDrop"
+          @mousedown="clearSelection"
+          role="list"
+        >
           <div
             class="canvas-image"
             v-for="(image, index) in canvasImage"
@@ -31,6 +39,7 @@
             :style="getCanvasImageStyle(image)"
             @mousedown="startDragging(index, $event)"
             @contextmenu="showContextMenu($event, index)"
+            role="listitem"
           >
             <img :src="image.url" draggable="false" :alt="`Image ${index}`" />
           </div>
@@ -241,14 +250,16 @@ div.item {
   justify-content: center;
   align-items: center;
   display: flex;
+  overflow: auto;
 }
 
 .canvas {
-  width: 90%;
-  height: 90%;
+  width: 800px;
+  height: 600px;
   background-color: var(--color-white);
   box-shadow: 0.125rem 0 1rem var(--color-box-shadow);
   position: relative;
+  margin: 2rem;
 }
 
 .canvas-image {
