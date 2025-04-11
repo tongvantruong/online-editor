@@ -1,7 +1,7 @@
 {
-  "name": "mini-piktochart",
+  "name": "online-editor",
   "version": "0.0.1",
-  "description": "Take Home test for Piktochart FE Dev candidates",
+  "description": "Simple Online Editor",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "type-check": "vue-tsc --noEmit"
   },
-  "author": "Piktochart",
+  "author": "Truong Tong",
   "license": "ISC",
   "dependencies": {
     "bootstrap": "^4.6.1",

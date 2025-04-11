@@ -22,18 +22,21 @@
     </main>
 
     <footer class="footer">
-      <p>&copy; 2025 Truong Tong</p>
+      <p>&copy; {{ currentYear }} Truong Tong</p>
     </footer>
   </div>
 </template>
 
 <script setup lang="ts">
-const imageModules = import.meta.glob('./assets/images/*.{png,jpg,jpeg,gif,svg}', {
+const currentYear = new Date().getFullYear()
+
+type ImagePath = string
+const imageModules: Record<string, ImagePath> = import.meta.glob('./assets/images/*.{png,jpg,jpeg,gif,svg}', {
   eager: true,
   import: 'default',
 })
 
-const images = Object.values(imageModules)
+const images: ImagePath[] = Object.values(imageModules)
 </script>
 
 <style scoped>
@@ -50,7 +53,7 @@ const images = Object.values(imageModules)
 
 .sidebar {
   grid-area: sidebar;
-  box-shadow: 0.125rem 0 1rem #0000001a;
+  box-shadow: 0.125rem 0 1rem var(--color-box-shadow);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -66,22 +69,22 @@ const images = Object.values(imageModules)
 
 .item {
   width: 100px;
-  aspect-ratio: 1 /1;
+  height: 100px;
   object-fit: contain;
   padding: 0.5rem;
-  border: 1px solid #d9dfe1;
+  border: 1px solid var(--color-border);
   border-radius: 0.5rem;
-  background-color: #f6f8f8;
+  background-color: var(--color-bg-white);
   cursor: pointer;
 }
 
 .item:hover {
-  background-color: #edf0f1;
+  background-color: var(--color-bg-grey);
 }
 
 .main {
   grid-area: main;
-  background-color: #edf0f1;
+  background-color: var(--color-bg-grey);
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -102,7 +105,8 @@ const images = Object.values(imageModules)
 .canvas {
   width: 90%;
   height: 90%;
-  background-color: green;
+  background-color: var(--color-white);
+  box-shadow: 0.125rem 0 1rem var(--color-box-shadow);
 }
 
 .footer {
@@ -110,6 +114,6 @@ const images = Object.values(imageModules)
   text-align: center;
   padding: 2rem;
   background-color: #353254;
-  color: white;
+  color: var(--color-white);
 }
 </style>
