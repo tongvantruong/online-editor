@@ -2,7 +2,7 @@
   <div class="app">
     <aside class="sidebar">
       <h2>Items</h2>
-      <div>Add files</div>
+      <UploadButton class="upload-button" @uploaded="onUploaded" />
       <ul class="items">
         <img
           class="item"
@@ -11,7 +11,8 @@
           @dragstart="onDragStart(image)"
           :src="image"
           :key="index"
-          :alt="`Image ${index}`"
+          loading="lazy"
+          :alt="`Draggable image ${index}`"
         />
       </ul>
     </aside>
@@ -49,17 +50,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useThrottle } from './composables/useThrottle'
+import UploadButton from './components/UploadButton.vue'
 
 const currentYear = new Date().getFullYear()
 
 type ImagePath = string
-const imageModules: Record<string, ImagePath> = import.meta.glob('./assets/images/*.{png,jpg,jpeg,gif,svg}', {
-  eager: true,
-  import: 'default',
-})
-const images: ImagePath[] = Object.values(imageModules)
+const images = ref<ImagePath[]>([])
 
 type DroppedImage = {
   path: ImagePath
@@ -75,6 +73,69 @@ const draggingIndex = ref<number | null>(null)
 const selectedIndex = ref<number | null>(null)
 let offsetX = 0
 let offsetY = 0
+
+onMounted(async () => {
+  images.value = await fetchAllImages()
+  console.log(images.value[0])
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeydown)
+})
+
+const onUploaded = (url: string) => {
+  images.value.push(url)
+}
+
+const fetchAllImages = async (): Promise<string[]> => {
+  try {
+    const res = await fetch('http://localhost:8000/images')
+    if (!res.ok) throw new Error('Failed to fetch images')
+
+    const images: string[] = await res.json()
+    return images
+  } catch (err) {
+    console.error('❌ Failed to load images:', err)
+    return []
+  }
+}
+
+const handleKeydown = (e: KeyboardEvent) => {
+  e.preventDefault()
+  if (selectedIndex.value === null) return
+
+  deleteSelectedImageOnDeleteOrBackspace(e)
+  moveSelectedImageOnArrowKeys(e)
+}
+
+const deleteSelectedImageOnDeleteOrBackspace = (e: KeyboardEvent) => {
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    deleteImage(selectedIndex.value!!)
+  }
+}
+
+const moveSelectedImageOnArrowKeys = (e: KeyboardEvent) => {
+  const selectedImage = droppedImages.value[selectedIndex.value!!]
+  const fastSpeedIfHoldingShift = 10
+  const normalSpeed = 1
+  const step = e.shiftKey ? fastSpeedIfHoldingShift : normalSpeed
+
+  switch (e.key) {
+    case 'ArrowUp':
+      selectedImage.y -= step
+      break
+    case 'ArrowDown':
+      selectedImage.y += step
+      break
+    case 'ArrowLeft':
+      selectedImage.x -= step
+      break
+    case 'ArrowRight':
+      selectedImage.x += step
+      break
+  }
+}
 
 const onDragStart = (image: ImagePath) => {
   draggedImage.value = image
@@ -164,14 +225,24 @@ const deleteImage = (index: number) => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 1rem;
+}
+
+.upload-button {
+  margin-top: 2rem;
 }
 
 .items {
-  padding: 1rem;
   display: grid;
   width: 100%;
   gap: 0.25rem;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+
+div.item {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .item {
@@ -230,7 +301,7 @@ const deleteImage = (index: number) => {
 }
 
 .canvas-image.selected {
-  outline: 1px solid var(--color-selected);
+  outline: 1px solid var(--color-primary);
   outline-offset: 2px;
   z-index: 10;
 }

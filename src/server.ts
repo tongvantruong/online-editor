@@ -2,6 +2,12 @@ import express from 'express'
 import fs from 'fs'
 import multer from 'multer'
 import { not as isNotJunk } from 'junk'
+import { fileURLToPath } from 'url'
+import path, { dirname } from 'path'
+import cors from 'cors'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 const server = express()
 
@@ -27,7 +33,12 @@ const fileFilter = (req: Express.Request, file: Express.Multer.File, cb: any) =>
 const uploadMiddleware = multer({ storage, fileFilter }).single('upload')
 
 server
-  .use(express.static('./'))
+  .use(
+    cors({
+      origin: 'http://localhost:5173',
+    })
+  )
+  .use('/images', express.static(path.join(__dirname, 'images')))
   .post('/uploads', (req, res) => {
     uploadMiddleware(req, res, err => {
       if (err || !req.file) {
