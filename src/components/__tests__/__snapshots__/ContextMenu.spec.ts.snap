@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ContextMenu > matches snapshot 1`] = `
+"<ul data-v-cbb365ae="" class="context-menu" style="top: 0px; left: 0px;">
+  <li data-v-cbb365ae="" class="context-menu-item">❌<span data-v-cbb365ae="" class="context-menu-label">Delete</span></li>
+  <li data-v-cbb365ae="" class="context-menu-item">📄<span data-v-cbb365ae="" class="context-menu-label">Duplicate</span></li>
+</ul>"
+`;
+
+exports[`ContextMenu > matches snapshot 2`] = `
+"<ul data-v-cbb365ae="" class="context-menu" style="top: 0px; left: 0px;">
+  <li data-v-cbb365ae="" class="context-menu-item">❌<span data-v-cbb365ae="" class="context-menu-label">Delete</span></li>
+  <li data-v-cbb365ae="" class="context-menu-item">📄<span data-v-cbb365ae="" class="context-menu-label">Duplicate</span></li>
+</ul>"
+`;
