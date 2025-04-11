@@ -4,6 +4,9 @@
   --color-bg-white: #f6f8f8;
   --color-bg-grey: #edf0f1;
   --color-white: #fff;
+  --color-selected: #42b883;
+  --color-error: red;
+  --color-error-hover: #8b0000;
 }
 
 * {
