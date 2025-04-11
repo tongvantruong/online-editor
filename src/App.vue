@@ -55,6 +55,7 @@ import { useImageApi } from './composables/useImageApi'
 import { CanvasImage, ImageUrl } from './types/image.type'
 import { useContextMenu } from './composables/useContextMenu'
 import { MenuItem } from './components/ContextMenu.vue'
+import { useKeyboard } from './composables/useKeyboard'
 
 const KEY_CANVAS_IMAGES = 'CANVAS_IMAGES'
 
@@ -68,6 +69,15 @@ const {
   show: showContextMenu,
   hide: hideContextMenu,
 } = useContextMenu<number>()
+
+const deleteImage = (index: number) => {
+  canvasImage.value.splice(index, 1)
+  if (selectedIndex.value === index) {
+    selectedIndex.value = null
+  } else if (selectedIndex.value !== null && selectedIndex.value > index) {
+    selectedIndex.value--
+  }
+}
 
 const actions: MenuItem[] = [
   {
@@ -123,58 +133,12 @@ let offsetY = 0
 
 onMounted(() => {
   fetchImages()
-  window.addEventListener('keydown', handleKeydown)
 })
 
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', handleKeydown)
-})
+useKeyboard(canvasImage, selectedIndex, deleteImage)
 
 const onUploaded = (url: ImageUrl) => {
   images.value.push(url)
-}
-
-const validKeyBoards = ['Delete', 'Backspace', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'] as const
-type KeyBoard = (typeof validKeyBoards)[number]
-
-const handleKeydown = (e: KeyboardEvent) => {
-  if (selectedIndex.value === null) return
-
-  // For type-safe
-  if (validKeyBoards.includes(e.key as KeyBoard)) {
-    e.preventDefault()
-    deleteSelectedImageOnDeleteOrBackspace(e)
-    moveSelectedImageOnArrowKeys(e)
-  }
-}
-
-const deleteSelectedImageOnDeleteOrBackspace = (e: KeyboardEvent) => {
-  const key = e.key as KeyBoard
-  if (key === 'Delete' || key === 'Backspace') {
-    deleteImage(selectedIndex.value!!)
-  }
-}
-
-const moveSelectedImageOnArrowKeys = (e: KeyboardEvent) => {
-  const selectedImage = canvasImage.value[selectedIndex.value!!]
-  const fastSpeedIfHoldingShift = 10
-  const normalSpeed = 1
-  const step = e.shiftKey ? fastSpeedIfHoldingShift : normalSpeed
-
-  switch (e.key as KeyBoard) {
-    case 'ArrowUp':
-      selectedImage.y -= step
-      break
-    case 'ArrowDown':
-      selectedImage.y += step
-      break
-    case 'ArrowLeft':
-      selectedImage.x -= step
-      break
-    case 'ArrowRight':
-      selectedImage.x += step
-      break
-  }
 }
 
 const onDragStart = (image: ImageUrl) => {
@@ -235,15 +199,6 @@ const stopDragging = () => {
 const clearSelection = (e: MouseEvent) => {
   if ((e.target as HTMLElement).closest('.canvas-image') === null) {
     selectedIndex.value = null
-  }
-}
-
-const deleteImage = (index: number) => {
-  canvasImage.value.splice(index, 1)
-  if (selectedIndex.value === index) {
-    selectedIndex.value = null
-  } else if (selectedIndex.value !== null && selectedIndex.value > index) {
-    selectedIndex.value--
   }
 }
 
