@@ -211,12 +211,6 @@ const getCanvasImageStyle = (image: CanvasImage) => {
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
 }
 
-div.item {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .item {
   width: 100px;
   height: 100px;
