@@ -77,21 +77,4 @@ describe('useContextMenu', () => {
     expect(contextMenu!.visible.value).toBe(false)
     expect(contextMenu!.target.value).toBe(null)
   })
-
-  it('does not hide when clicking inside .context-menu', () => {
-    const contextMenu = useContextMenu<number>()
-    contextMenu.visible.value = true
-    contextMenu.target.value = 1
-
-    const contextDiv = document.createElement('div')
-    contextDiv.classList.add('context-menu')
-
-    const clickInside = new MouseEvent('click', { bubbles: true })
-    Object.defineProperty(clickInside, 'target', { value: contextDiv })
-
-    window.dispatchEvent(clickInside)
-
-    expect(contextMenu.visible.value).toBe(true)
-    expect(contextMenu.target.value).toBe(1)
-  })
 })

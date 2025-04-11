@@ -35,7 +35,6 @@ export function useImageApi() {
       const data: UploadedImage = await res.json()
       return data.file
     } catch (err) {
-      console.error('Upload error:', err)
       return null
     }
   }

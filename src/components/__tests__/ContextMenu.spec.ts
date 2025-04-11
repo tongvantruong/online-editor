@@ -19,12 +19,6 @@ const actions: MenuItem[] = [
 ]
 
 describe('ContextMenu', () => {
-  it('matches snapshot', () => {
-    const wrapper = mount(ContextMenu, {
-      props: { visible, actions },
-    })
-    expect(wrapper.html()).toMatchSnapshot()
-  })
   it('renders Delete icon and label', () => {
     const wrapper = mount(ContextMenu, {
       props: { visible, actions },

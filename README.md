@@ -24,3 +24,25 @@
 - [ ] Right click should show list of actions on as a context menu
 - [x] Duplicate feature (right click to see the action): allow duplicate a selected image, don't need to copy & paste
 - [x] Bring to front feature
+
+## How to run
+
+Install packages
+
+```
+npm install
+```
+
+Run server
+
+```
+npm run be
+```
+
+Run the app
+
+```
+npm run fe
+```
+
+Access http://localhost:5173/
