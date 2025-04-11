@@ -1,3 +1,13 @@
+## Unit Test Results
+<img width="954" alt="image" src="https://github.com/user-attachments/assets/a470e9f4-a69c-4f3e-b6be-8a22dcb11057" />
+
+## E2E Tests
+Will add if have more time
+- [ ] should show the images on UI if uploaded
+- [ ] should render image on canvas if dragged and dropped
+- [ ] should delete the selected image by keyboard and context menu
+- [ ] should move the selected image by keyboard and context menu
+
 ## Main Features
 
 - [x] User must see the existing images from folder `images` to the images list
@@ -21,7 +31,7 @@
 - [ ] Delete uploaded images
 - [ ] Hold Cmd/Control + click to select multi images then can move or delete multi images
 - [ ] Select multi images by mouse
-- [ ] Right click should show list of actions on as a context menu
+- [x] Right click should show list of actions on as a context menu
 - [x] Duplicate feature (right click to see the action): allow duplicate a selected image, don't need to copy & paste
 - [x] Bring to front feature
 
