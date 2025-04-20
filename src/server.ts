@@ -35,7 +35,7 @@ const uploadMiddleware = multer({ storage, fileFilter }).single('upload')
 server
   .use(
     cors({
-      origin: 'http://localhost:5173',
+      origin: '*',
     })
   )
   .use('/images', express.static(path.join(__dirname, 'images')))
